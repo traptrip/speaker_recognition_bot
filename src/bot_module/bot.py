@@ -38,7 +38,6 @@ class TGBot:
                                          state=UserStates.audio,
                                          content_types=types.ContentTypes.AUDIO | types.ContentTypes.VOICE)
         self.dp.register_message_handler(self.process_audio_no_stage,
-                                         state=UserStates.name,
                                          content_types=types.ContentTypes.AUDIO | types.ContentTypes.VOICE,
                                          )
 
@@ -54,7 +53,7 @@ class TGBot:
         await message.reply("Голос обрабатывается...")
         speaker_vector = self.speaker_recognizer.get_speaker_vector(audio_path)
         self.storage_manager.add_speaker(speaker_name,
-                                         speaker_vector[0].tolist(),
+                                         speaker_vector[0],
                                          audio_path)
 
         await message.reply("Голос добавлен")
@@ -67,7 +66,16 @@ class TGBot:
         await message.reply("Голос обрабатывается...")
         file = await self.bot.get_file(audio.file_id)
         file_path = file.file_path
-        await self.bot.download_file(file_path, f"{audio_data_path}/user_{audio.file_unique_id}.wav")
+        audio_path = f"{audio_data_path}/user_{audio.file_unique_id}.wav"
+        await self.bot.download_file(file_path, audio_path)
+        await message.answer("Голос проверяется нейросетью...")
+        speaker_info = self.speaker_recognizer.recognize_speaker(audio_path)
+        if speaker_info:
+            await message.answer(f"ID: {speaker_info[0]}\n"
+                                 f"NAME: {speaker_info[1]}\n"
+                                 f"CONFIDENCE: {speaker_info[2]}")
+        else:
+            await message.answer(f"Система не обнаружила подходящего голоса =(")
 
     def run(self):
         executor.start_polling(self.dp, skip_updates=True)

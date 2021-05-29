@@ -31,10 +31,11 @@ class StorageManager:
 
     @classmethod
     def get_all_speakers(cls):
-        all_speakers = Speaker.select()
-
-        return all_speakers
+        all_speakers_query = Speaker.select()
+        speakers = [[s.speaker_id, s.name, pickle.loads(s.vector)] for s in all_speakers_query]
+        return speakers
 
 
 if __name__ == '__main__':
     sm = StorageManager()
+    sm.get_all_speakers()

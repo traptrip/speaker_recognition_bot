@@ -50,11 +50,12 @@ class SpeakerRecognizer:
     def get_speaker_info(self, speaker_vector):
         speaker_info = []
         all_speakers = self.storage_manager.get_all_speakers()
-        all_vectors = [i[1] for i in all_speakers]
+        all_vectors = torch.stack([i[2] for i in all_speakers])
         similarities = self.cos_sim(speaker_vector, all_vectors)
         max_similar_idx = similarities.argmax()
         if similarities[max_similar_idx] > self.config['threshold']:
-            speaker_info = all_speakers[max_similar_idx]
+            # id, name, confidence
+            speaker_info = all_speakers[max_similar_idx][:-1] + [similarities[max_similar_idx].item()]
 
         return speaker_info
 
