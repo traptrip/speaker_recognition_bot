@@ -1,0 +1,6 @@
+invoke
+aiogram
+torch
+pandas
+speechbrain
+peewee
