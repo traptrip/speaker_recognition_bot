@@ -11,10 +11,11 @@ class UserStates(StatesGroup):
 
 async def cmd_start(message: types.Message):
     text = "Приветствую!\n" \
-           "Я бот идентифицирующий людей по их голосу\n" \
-           "Чтобы добавить свой голос и я мог узнать Вас напишите \n" \
+           "Я бот идентифицирующий людей по их голосу.\n" \
+           "Чтобы добавить свой голос, и я мог узнать Вас, напишите " \
            "/add_voice\n" \
-           "Если Вы зарегистрированны просто пришлите мне голосовое сообщение или аудиофайл и я скажу кто Вы"
+           "Если Вы зарегистрированы, просто пришлите мне голосовое сообщение или аудиофайл, и я скажу, кто Вы.\n" \
+           "Чтобы посмотреть список доступных команд напишите /help"
 
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     buttons = ["/add_voice", "/cancel", "/help"]
@@ -27,33 +28,25 @@ async def cmd_help(message: types.Message):
     text = "/start - начать работу с ботом\n" \
            "/help - показать список команд\n" \
            "/add_voice - зарегистрировать новый голос\n" \
-           "/cancel - прекратить выполнение любого процесса"
+           "/cancel - прекратить процесс добавления человека"
     await message.reply(text)
 
 
 async def cancel_handler(message: types.Message, state: FSMContext):
-    """
-    Allow user to cancel any action
-    """
     current_state = await state.get_state()
     if current_state is None:
         return
-    # Cancel state and inform user about it
     await state.finish()
-    # Remove keyboard (just in case)
     await message.reply('Операция прекращена.')
 
 
 async def add_voice(message: types.Message):
-    # Set state
     await UserStates.name.set()
-
-    text = '''Как Вас зовут?'''
-    await message.reply(text)
+    await message.reply("Введите имя человека, которого хотите зарегистрировать")
 
 
 async def process_name_invalid(message: types.Message):
-    return await message.reply("Вы должны написать свое имя")
+    return await message.reply("Вы должны написать имя")
 
 
 async def process_name(message: types.Message, state: FSMContext):
@@ -61,9 +54,9 @@ async def process_name(message: types.Message, state: FSMContext):
         data['name'] = message.text
 
     await UserStates.next()
-    await message.reply(f"Теперь отправьте мне голосовое сообщение или аудиофайл с Вашим голосом")
+    await message.reply(f"Теперь отправьте голосовое сообщение или аудиофайл с голосом этого человека\n"
+                        f"Чтобы бот мог корректно распознать голос, аудио должно содержать не менее 3-5 секунд речи.")
 
 
-# Check if we got something that isn't audio or voice
 async def process_audio_invalid(message: types.Message):
-    return await message.reply("Вы должны отправить аудиофайл формата .mp3 или голосовое сообщение")
+    return await message.reply("Вы должны отправить аудиофайл или голосовое сообщение")

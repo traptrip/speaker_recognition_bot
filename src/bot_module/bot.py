@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from aiogram import Bot, Dispatcher
@@ -26,14 +27,13 @@ class TGBot:
         self.dp.register_message_handler(add_voice,
                                          commands="add_voice")
         self.dp.register_message_handler(process_name_invalid,
-                                         lambda message: message.text is None,
+                                         lambda message: not message.text,
                                          state=UserStates.name)
         self.dp.register_message_handler(process_name,
                                          state=UserStates.name)
         self.dp.register_message_handler(process_audio_invalid,
-                                         lambda message: message.audio is None and message.voice is None,
-                                         state=UserStates.audio,
-                                         content_types=types.ContentTypes.AUDIO | types.ContentTypes.VOICE)
+                                         lambda message: not (message.audio or message.voice),
+                                         state=UserStates.audio)
         self.dp.register_message_handler(self.process_audio,
                                          state=UserStates.audio,
                                          content_types=types.ContentTypes.AUDIO | types.ContentTypes.VOICE)
@@ -52,6 +52,7 @@ class TGBot:
 
         await message.reply("Голос обрабатывается...")
         speaker_vector = self.speaker_recognizer.get_speaker_vector(audio_path)
+        os.remove(audio_path)
         self.storage_manager.add_speaker(speaker_name,
                                          speaker_vector[0],
                                          audio_path)
@@ -70,12 +71,18 @@ class TGBot:
         await self.bot.download_file(file_path, audio_path)
         await message.answer("Голос проверяется нейросетью...")
         speaker_info = self.speaker_recognizer.recognize_speaker(audio_path)
-        if speaker_info:
-            await message.answer(f"ID: {speaker_info[0]}\n"
-                                 f"NAME: {speaker_info[1]}\n"
-                                 f"CONFIDENCE: {speaker_info[2]}")
+        os.remove(audio_path)
+        if speaker_info[0]:
+            await message.answer(f"ID: {speaker_info[0][0]}\n"
+                                 f"NAME: {speaker_info[0][1]}\n"
+                                 f"CONFIDENCE: {speaker_info[0][2]}")
         else:
-            await message.answer(f"Система не обнаружила подходящего голоса =(")
+            await message.answer(f"Система не обнаружила подходящего голоса, в котором была бы достаточно уверена =(\n")
+                                 # f"Возможно фрагмент аудио слишком мал")
+            # await message.answer(f"Возможно это Вы:\n"
+            #                      f"POSSIBLE_ID: {speaker_info[1][0]}\n"
+            #                      f"POSSIBLE_NAME: {speaker_info[1][1]}\n"
+            #                      f"CONFIDENCE: {speaker_info[1][2]}")
 
     def run(self):
         executor.start_polling(self.dp, skip_updates=True)
