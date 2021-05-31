@@ -1,7 +1,4 @@
-import torch
 import torchaudio
-import librosa
-from speechbrain.lobes.features import Fbank, MFCC
 
 
 def _get_sample(path, resample=None):

@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM pure/python:3.8-cuda10.1-cudnn7-runtime
 
 WORKDIR /app
 

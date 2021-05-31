@@ -58,6 +58,7 @@ class TGBot:
                                          audio_path)
 
         await message.reply("Голос добавлен")
+        await message.answer("Теперь Вы можете отправить голосовое сообщение или аудиозапись, и бот скажет, кто Вы")
 
         # Finish conversation
         await state.finish()
@@ -77,12 +78,10 @@ class TGBot:
                                  f"NAME: {speaker_info[0][1]}\n"
                                  f"CONFIDENCE: {speaker_info[0][2]}")
         else:
-            await message.answer(f"Система не обнаружила подходящего голоса, в котором была бы достаточно уверена =(\n")
-                                 # f"Возможно фрагмент аудио слишком мал")
-            # await message.answer(f"Возможно это Вы:\n"
-            #                      f"POSSIBLE_ID: {speaker_info[1][0]}\n"
-            #                      f"POSSIBLE_NAME: {speaker_info[1][1]}\n"
-            #                      f"CONFIDENCE: {speaker_info[1][2]}")
+            await message.answer(f"Система не достаточно уверена, но возможно это Вы:\n"
+                                 f"ID: {speaker_info[1][0]}\n"
+                                 f"NAME: {speaker_info[1][1]}\n"
+                                 f"CONFIDENCE: {speaker_info[1][2]:.4f}")
 
     def run(self):
         executor.start_polling(self.dp, skip_updates=True)
