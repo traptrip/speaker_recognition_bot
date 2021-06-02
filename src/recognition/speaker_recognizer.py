@@ -1,9 +1,9 @@
 from pathlib import Path
 
 import torch
+import librosa
+from torchaudio.transforms import MelSpectrogram
 from speechbrain.lobes.models.ECAPA_TDNN import ECAPA_TDNN
-from speechbrain.processing.features import InputNormalization
-from speechbrain.lobes.features import Fbank
 
 from src.recognition.audio_utils import get_speech_sample
 
@@ -30,24 +30,38 @@ class SpeakerRecognizer:
             Path(__file__).parent / self.config['weights_path'],
             map_location=torch.device(self.device)))
         self.identification_model.eval()
-        self.mean_var_norm = InputNormalization(norm_type='sentence', std_norm=False)
-        self.compute_features = Fbank(n_mels=80)
+        # self.compute_features = Fbank(n_mels=80)
+        self.compute_features = MelSpectrogram(
+                                    sample_rate=self.config['sample_rate'],
+                                    n_fft=400,
+                                    win_length=int((self.config['sample_rate'] / 1000.0) * 25),
+                                    hop_length=int((self.config['sample_rate'] / 1000.0) * 10),
+                                    center=True,
+                                    pad_mode="constant",
+                                    power=2.,
+                                    onesided=True,
+                                    n_mels=self.config['n_mels'],
+                                    window_fn=torch.hamming_window
+                                )
         self.cos_sim = torch.nn.CosineSimilarity(dim=1)
 
-    def _preprocess_audio_sample(self, audio_file):
-        waveform, sample_rate = get_speech_sample(audio_file)
+    def _preprocess_audio_sample(self, audio_sample):
+        waveform, sample_rate = audio_sample
         if len(waveform.shape) == 1:
             waveform = waveform.unsqueeze(0)
         wav_lens = torch.ones(waveform.shape[0])
         waveform, wav_lens = waveform.to(self.device), wav_lens.to(self.device)
         # Computing features
-        features = self.compute_features(waveform)
-        features = self.mean_var_norm(features, wav_lens)
+        # features = self.compute_fbank(waveform)
+        melspec = self.compute_features(waveform)
+        melspec = torch.from_numpy(librosa.power_to_db(melspec))  # get dB MelSpectrogram
+        features = melspec.transpose(1, 2)
 
         return features, wav_lens
 
     def get_speaker_vector(self, audio_file) -> torch.tensor:
-        input_features, wav_lens = self._preprocess_audio_sample(audio_file)
+        audio_sample = get_speech_sample(audio_file)
+        input_features, wav_lens = self._preprocess_audio_sample(audio_sample)
         speaker_vector = self.identification_model(input_features, wav_lens)
 
         return speaker_vector[0]
@@ -79,11 +93,3 @@ class SpeakerRecognizer:
 #
 #     sr = SpeakerRecognizer(cfg['recognizer'])
 #     vector = sr.get_speaker_vector('./../../data/audios/gob_AgADBA8AAuxvmEk.wav')
-
-
-
-
-
-
-
-

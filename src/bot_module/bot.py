@@ -34,14 +34,14 @@ class TGBot:
         self.dp.register_message_handler(process_audio_invalid,
                                          lambda message: not (message.audio or message.voice),
                                          state=UserStates.audio)
-        self.dp.register_message_handler(self.process_audio,
+        self.dp.register_message_handler(self.add_audio,
                                          state=UserStates.audio,
                                          content_types=types.ContentTypes.AUDIO | types.ContentTypes.VOICE)
-        self.dp.register_message_handler(self.process_audio_no_stage,
+        self.dp.register_message_handler(self.process_audio,
                                          content_types=types.ContentTypes.AUDIO | types.ContentTypes.VOICE,
                                          )
 
-    async def process_audio(self, message: types.Message, state: FSMContext):
+    async def add_audio(self, message: types.Message, state: FSMContext):
         audio = message.audio or message.voice
         file = await self.bot.get_file(audio.file_id)
         file_path = file.file_path
@@ -57,13 +57,13 @@ class TGBot:
                                          speaker_vector[0],
                                          audio_path)
 
-        await message.reply("Голос добавлен")
+        await message.answer("Голос добавлен")
         await message.answer("Теперь Вы можете отправить голосовое сообщение или аудиозапись, и бот скажет, кто Вы")
 
         # Finish conversation
         await state.finish()
 
-    async def process_audio_no_stage(self, message: types.Message):
+    async def process_audio(self, message: types.Message):
         audio = message.audio or message.voice
         await message.reply("Голос обрабатывается...")
         file = await self.bot.get_file(audio.file_id)
