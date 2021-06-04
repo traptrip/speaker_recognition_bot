@@ -49,19 +49,19 @@ class SpeakerRecognizer:
         waveform, sample_rate = audio_sample
         if len(waveform.shape) == 1:
             waveform = waveform.unsqueeze(0)
-        wav_lens = torch.ones(waveform.shape[0])
-        waveform, wav_lens = waveform.to(self.device), wav_lens.to(self.device)
+        waveform = waveform.to(self.device)
         # Computing features
         # features = self.compute_fbank(waveform)
         melspec = self.compute_features(waveform)
         melspec = torch.from_numpy(librosa.power_to_db(melspec))  # get dB MelSpectrogram
         features = melspec.transpose(1, 2)
 
-        return features, wav_lens
+        return features
 
     def get_speaker_vector(self, audio_file) -> torch.tensor:
         audio_sample = get_speech_sample(audio_file)
-        input_features, wav_lens = self._preprocess_audio_sample(audio_sample)
+        input_features = self._preprocess_audio_sample(audio_sample)
+        wav_lens = torch.ones(input_features.shape[0], device=self.device)
         speaker_vector = self.identification_model(input_features, wav_lens)
 
         return speaker_vector[0]

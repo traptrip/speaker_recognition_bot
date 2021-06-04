@@ -6,16 +6,13 @@ from peewee import Model, CharField, BlobField, IntegerField, SqliteDatabase
 db = SqliteDatabase(Path(__file__).parent / '../data/speakers.db')
 
 
-class BaseModel(Model):
+class Speaker(Model):
+    speaker_id = IntegerField(primary_key=True)
+    name = CharField(max_length=255)
+    vector = BlobField()
+
     class Meta:
         database = db
-
-
-class Speaker(BaseModel):
-    speaker_id = IntegerField(primary_key=True)
-    name = CharField()
-    vector = BlobField()
-    audio_path = BlobField()
 
 
 class StorageManager:
@@ -23,11 +20,10 @@ class StorageManager:
         Speaker.create_table()
 
     @classmethod
-    def add_speaker(cls, speaker_name, speaker_vector, audio_path):
+    def add_speaker(cls, speaker_name, speaker_vector):
         speaker_vector_dump = pickle.dumps(speaker_vector)
         Speaker.create(name=speaker_name,
-                       vector=speaker_vector_dump,
-                       audio_path=audio_path)
+                       vector=speaker_vector_dump)
 
     @classmethod
     def get_all_speakers(cls):

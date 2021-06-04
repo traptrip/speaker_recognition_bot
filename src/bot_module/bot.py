@@ -32,7 +32,7 @@ class TGBot:
         self.dp.register_message_handler(process_name,
                                          state=UserStates.name)
         self.dp.register_message_handler(process_audio_invalid,
-                                         lambda message: not (message.audio or message.voice),
+                                         lambda message: message.audio is None and message.voice is None,
                                          state=UserStates.audio)
         self.dp.register_message_handler(self.add_audio,
                                          state=UserStates.audio,
@@ -77,11 +77,13 @@ class TGBot:
             await message.answer(f"ID: {speaker_info[0][0]}\n"
                                  f"NAME: {speaker_info[0][1]}\n"
                                  f"CONFIDENCE: {speaker_info[0][2]}")
-        else:
+        elif speaker_info[1]:
             await message.answer(f"Система не достаточно уверена, но возможно это Вы:\n"
                                  f"ID: {speaker_info[1][0]}\n"
                                  f"NAME: {speaker_info[1][1]}\n"
                                  f"CONFIDENCE: {speaker_info[1][2]:.4f}")
+        else:
+            await message.answer("В системе нет зарегистрированных голосов")
 
     def run(self):
         executor.start_polling(self.dp, skip_updates=True)
