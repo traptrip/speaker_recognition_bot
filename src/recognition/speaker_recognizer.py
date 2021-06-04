@@ -60,6 +60,7 @@ class SpeakerRecognizer:
 
     def get_speaker_vector(self, audio_file) -> torch.tensor:
         audio_sample = get_speech_sample(audio_file)
+        audio_sample = crop_audio(audio_sample, sample_rate, secs=60)
         input_features = self._preprocess_audio_sample(audio_sample)
         wav_lens = torch.ones(input_features.shape[0], device=self.device)
         speaker_vector = self.identification_model(input_features, wav_lens)
