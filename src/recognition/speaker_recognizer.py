@@ -5,7 +5,7 @@ import librosa
 from torchaudio.transforms import MelSpectrogram
 from speechbrain.lobes.models.ECAPA_TDNN import ECAPA_TDNN
 
-from src.recognition.audio_utils import get_speech_sample
+from src.recognition.audio_utils import get_speech_sample, crop_audio
 
 
 class SpeakerRecognizer:
