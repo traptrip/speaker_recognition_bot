@@ -1,0 +1,16 @@
+recognizer:
+  threshold: 0.63
+  weights_path: weights/embedding_model.ckpt
+  sample_rate: 16000
+  n_mels: 80
+  device: cpu
+  input_size: 80
+  channels: [1024, 1024, 1024, 1024, 3072]
+  kernel_sizes: [ 5, 3, 3, 3, 1 ]
+  dilations: [ 1, 2, 3, 4, 1 ]
+  attention_channels: 128
+  lin_neurons: 192
+  res2net_scale: 8
+  se_channels: 128
+bot:
+  BOT_TOKEN: enter_bot_token_here
