@@ -54,8 +54,7 @@ class TGBot:
         speaker_vector = self.speaker_recognizer.get_speaker_vector(audio_path)
         os.remove(audio_path)
         self.storage_manager.add_speaker(speaker_name,
-                                         speaker_vector[0],
-                                         audio_path)
+                                         speaker_vector[0])
 
         await message.answer("Голос добавлен")
         await message.answer("Теперь Вы можете отправить голосовое сообщение или аудиозапись, и бот скажет, кто Вы")
