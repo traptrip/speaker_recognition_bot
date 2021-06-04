@@ -47,18 +47,19 @@ class TGBot:
         file_path = file.file_path
         async with state.proxy() as data:
             speaker_name = data['name']
-        audio_path = f"{audio_data_path}/{speaker_name}_{audio.file_unique_id}.wav"
+        audio_path = f"{audio_data_path}/{speaker_name}_{audio.file_unique_id}{os.path.splitext(file_path)[1]}"
         await self.bot.download_file(file_path, audio_path)
 
         await message.reply("Голос обрабатывается...")
-        speaker_vector = self.speaker_recognizer.get_speaker_vector(audio_path)
-        os.remove(audio_path)
-        self.storage_manager.add_speaker(speaker_name,
-                                         speaker_vector[0])
-
-        await message.answer("Голос добавлен")
-        await message.answer("Теперь Вы можете отправить голосовое сообщение или аудиозапись, и бот скажет, кто Вы")
-
+        try:
+            speaker_vector = self.speaker_recognizer.get_speaker_vector(audio_path)
+            os.remove(audio_path)
+            self.storage_manager.add_speaker(speaker_name,
+                                             speaker_vector[0])
+            await message.answer("Голос добавлен")
+            await message.answer("Теперь Вы можете отправить голосовое сообщение или аудиозапись, и бот скажет, кто Вы")
+        except Exception:
+            await message.answer("Ошибка при добавлении голоса")
         # Finish conversation
         await state.finish()
 

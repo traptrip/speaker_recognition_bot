@@ -9,7 +9,12 @@ def _get_sample(path, resample=None):
     ]
     if resample:
         effects.append(["rate", f'{resample}'])
-    return torchaudio.sox_effects.apply_effects_file(path, effects=effects)
+    try:
+        wav = torchaudio.sox_effects.apply_effects_file(path, effects=effects)
+    except Exception:
+        wav = torchaudio.sox_effects.apply_effects_file(path, effects=effects, format='mp3')
+
+    return wav
 
 
 def get_speech_sample(audio_path, resample=16000):
