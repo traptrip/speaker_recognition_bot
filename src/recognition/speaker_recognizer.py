@@ -5,7 +5,7 @@ import librosa
 from torchaudio.transforms import MelSpectrogram
 from speechbrain.lobes.models.ECAPA_TDNN import ECAPA_TDNN
 
-from src.recognition.audio_utils import get_speech_sample
+from src.recognition.audio_utils import get_speech_sample, crop_audio
 
 
 class SpeakerRecognizer:
@@ -47,6 +47,7 @@ class SpeakerRecognizer:
 
     def _preprocess_audio_sample(self, audio_sample):
         waveform, sample_rate = audio_sample
+        waveform = crop_audio(waveform, sample_rate, secs=60)
         if len(waveform.shape) == 1:
             waveform = waveform.unsqueeze(0)
         waveform = waveform.to(self.device)
