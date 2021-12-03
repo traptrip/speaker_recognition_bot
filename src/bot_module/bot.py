@@ -8,6 +8,7 @@ from aiogram.utils import executor
 from src.bot_module.handlers import *
 
 audio_data_path = Path(__file__).parent / "../../data/audios"
+audio_data_path.mkdir(exist_ok=True)
 
 
 class TGBot:

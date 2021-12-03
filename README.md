@@ -3,7 +3,6 @@
 ## Before you start 
 - add your telegram bot token in **config.yml** (see example_config.yml)
 - add your pretrained weights for ecapa-tdnn model in **./src/recognition/weights** (my pretrained weights: https://disk.yandex.com/d/qa2cUQUxMSBMWw)
-- make **./data/audio** folder in the project directory
 
 ## Start app with Docker
 ```bash
